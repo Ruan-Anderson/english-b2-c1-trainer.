@@ -18,8 +18,21 @@ jobs:
       - run: |
           mkdir proj
           unzip -q English-Lab-LEVE.zip -d proj
-      - run: gradle :app:assembleDebug --no-daemon --stacktrace
+      - name: Build
         working-directory: proj
+        run: gradle :app:assembleDebug --no-daemon --console=plain > ../build.log 2>&1
+      - name: Mostrar erro
+        if: failure()
+        run: |
+          if grep -q 'What went wrong' build.log; then
+            grep -m1 -A25 'What went wrong' build.log > erro.txt
+          else
+            tail -40 build.log > erro.txt
+          fi
+          cat erro.txt
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat erro.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
       - uses: actions/upload-artifact@v4
         with:
           name: english-lab-apk
