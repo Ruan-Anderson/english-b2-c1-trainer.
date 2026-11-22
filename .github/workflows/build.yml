@@ -18,6 +18,15 @@ jobs:
       - run: |
           mkdir proj
           unzip -q English-Lab-LEVE.zip -d proj
+      - name: Corrigir StudyStore
+        run: |
+          python3 - <<'EOF'
+          p='proj/app/src/main/java/com/englishlab/trainer/StudyStore.java'
+          s=open(p,encoding='utf-8').read()
+          s=s.replace('new String[]{section}))while(c.moveToNext())completed.put(c.getString(0));','new String[]{section})){while(c.moveToNext())completed.put(c.getString(0));}')
+          s=s.replace('String.valueOf(startAt)}))while(c.moveToNext())pending.put(c.getString(0));','String.valueOf(startAt)})){while(c.moveToNext())pending.put(c.getString(0));}')
+          open(p,'w',encoding='utf-8').write(s)
+          EOF
       - name: Build
         working-directory: proj
         run: gradle :app:assembleDebug --no-daemon --console=plain > ../build.log 2>&1
@@ -30,9 +39,6 @@ jobs:
             tail -40 build.log > erro.txt
           fi
           cat erro.txt
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cat erro.txt >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
       - uses: actions/upload-artifact@v4
         with:
           name: english-lab-apk
